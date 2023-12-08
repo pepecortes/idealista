@@ -1,0 +1,25 @@
+cabal-version:  3.8
+name:           idealista
+version:        0.0.1
+synopsis:       An "idealista.com" to exercise the Haskell in Depth book
+build-type:     Simple
+
+executable idealista
+  hs-source-dirs:   src
+  main-is:          Main.hs
+  other-modules:    Params PisoData JsonWorker ApiRequest PisoReport Archiver
+  build-depends:
+    , base
+    , bytestring
+    , configurator
+    , directory
+    , text
+    , optparse-applicative
+    , aeson
+    , fmt
+    , mtl
+    , http-conduit
+    , vector
+    , colonnade
+    , time
+  default-language: Haskell2010
