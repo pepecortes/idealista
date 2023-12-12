@@ -3,18 +3,12 @@ module Archiver where
 import Params ( AppConfig(archivePath) )
 import PisoData ( timeStamp, PisoData(propertyCode) )
 
-import Data.Aeson
-    ( FromJSON(parseJSONList),
-      ToJSON(toEncoding),
-      encode,
-      decode,
-      defaultOptions,
-      genericToEncoding, encodeFile )
-import Data.Aeson.Types (parseMaybe)
+import Data.Aeson ( encode, decode, encodeFile )
 import qualified Data.ByteString.Lazy.Char8 as BL8
+import qualified Data.ByteString.Char8 as BS8
 import Control.Monad ( foldM )
 import Control.Monad.Reader
-    ( ReaderT, foldM, MonadIO(liftIO), asks )
+    ( ReaderT, MonadIO(liftIO), asks )
 
 firstArchive :: [PisoData] -> ReaderT AppConfig IO ()
 firstArchive pd = do
@@ -27,18 +21,20 @@ updateArchive :: [PisoData] -> ReaderT AppConfig IO [PisoData]
 updateArchive pisos = do
   archive <- loadArchive
   path <- asks archivePath
-  liftIO $ do
+  _ <- liftIO $ do
     archive' <- checkAllPisos archive pisos
     encodeFile path archive'
     return archive'
+  pure []
 
 loadArchive :: ReaderT AppConfig IO [PisoData]
 loadArchive = do
   path <- asks archivePath
   liftIO $ do
-    str <- BL8.readFile path
-    let (Just pisos) = decode str
+    str <- BS8.readFile path
+    let (Just pisos) = decode $ BS8.fromStrict str
     return pisos
+
 
 -- Check if the given piso is already in the list
 -- If it is the case, update the recentSeen attribute

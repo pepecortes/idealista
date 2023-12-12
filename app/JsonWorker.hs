@@ -6,7 +6,7 @@ import Params ( AppConfig(searchParams) )
 import PisoData ( PisoData(price, lastPrice) )
 import ApiRequest ( requestAuth, requestSearch )
 
-import Data.Aeson ( decode, encode, FromJSON(parseJSONList) )
+import Data.Aeson ( FromJSON(parseJSONList) )
 import Data.Aeson.Types ( parseMaybe )
 import Control.Monad.Reader ( ReaderT, MonadIO(liftIO), asks )
 

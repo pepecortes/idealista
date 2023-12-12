@@ -11,12 +11,10 @@ import ApiRequest ()
 
 import Data.Text ( Text )
 import qualified Data.Text.IO as TIO ( putStrLn )
-import Control.Monad ( when )
 import Control.Monad.Reader
     ( ReaderT(runReaderT), MonadIO(liftIO) )
 import Data.Configurator as C
     ( load, lookupDefault, Worth(Required) )
-import Data.Configurator.Types ( Config )
 
 
 workUpdate :: ReaderT AppConfig IO ()
@@ -62,7 +60,7 @@ loadConfig filePath = do
     <*> lookupDefault "" conf "searchURL" 
     <*> lookupDefault [] conf "searchParams"
     <*> lookupDefault "" conf "archiveFilePath" 
-
+    
 main :: IO ()
 main = do
   params <- cmdLineParser
