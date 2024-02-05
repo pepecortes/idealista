@@ -25,7 +25,7 @@ updateArchive pisos = do
     archive' <- checkAllPisos archive pisos
     encodeFile path archive'
     return archive'
-  pure []
+  pure pisos
 
 loadArchive :: ReaderT AppConfig IO [PisoData]
 loadArchive = do
