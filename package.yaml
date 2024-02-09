@@ -27,6 +27,12 @@ dependencies:
 - vector
 - colonnade
 - time
+- persistent
+- persistent-sqlite
+- unliftio-core
+- conduit 
+- monad-logger
+
 
 ghc-options:
 - -Wall

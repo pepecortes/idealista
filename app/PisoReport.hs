@@ -2,7 +2,7 @@
 
 module PisoReport where
 
-import PisoData
+import Schemas
 
 import Colonnade (ascii, headed)
 import Fmt ( (+|), fmt, (|+), indentF, nameF )
@@ -12,20 +12,20 @@ import Data.Text ( Text )
 import qualified Data.Text as T (append)
 
 
-textReport :: [PisoData] -> String
+textReport :: [Piso] -> String
 textReport = ascii colStats
     where
         colStats = mconcat [
-              headed "fecha" (formatDate . firstSeen)
-            , headed "url" (noQuotes . show . url)
-            , headed "m2" (show . size)
+              headed "fecha" (formatDate . pisoFirstSeen)
+            , headed "url" (noQuotes . show . pisoUrl)
+            , headed "m2" (show . pisoSize)
             , headed "piso" pisoAscensor
-            , headed "habitaciones" (show . rooms)
-            , headed "ext/int" (extInt . exterior)
-            , headed "estado" (noQuotes . show . status)
-            , headed "precio" (show . price)
-            , headed "visto en" (formatDate . recentSeen)
-            , headed "ultimo precio" (showMaybe . lastPrice)
+            , headed "habitaciones" (show . pisoRooms)
+            , headed "ext/int" (extInt . pisoExterior)
+            , headed "estado" (noQuotes . show . pisoStatus)
+            , headed "precio" (show . pisoPrice)
+            , headed "visto en" (formatDate . pisoRecentSeen)
+            , headed "ultimo precio" (showMaybe . pisoLastPrice)
             ]
 
 showMaybe :: Show a => Maybe a -> String
@@ -43,28 +43,28 @@ extInt :: Bool -> String
 extInt True = "exterior"
 extInt False = "interior"
 
-pisoAscensor :: PisoData -> String
-pisoAscensor pd | hasLift pd = noQuotes $ show piso
+pisoAscensor :: Piso -> String
+pisoAscensor pd | pisoHasLift pd = noQuotes $ show piso
                 | otherwise  = noQuotes $ show $ T.append piso " (sin ascensor)"
   where
-    piso = PisoData.floor pd
+    piso = pisoFloor pd
 
-reportFromId :: [PisoData] -> Text -> Text
+reportFromId :: [Piso] -> Text -> Text
 reportFromId pd id = singlePisoReport piso
-  where piso = find (\piso -> propertyCode piso == id) pd
+  where piso = find (\piso -> pisoPropertyCode piso == id) pd
 
-singlePisoReport :: Maybe PisoData -> Text
+singlePisoReport :: Maybe Piso -> Text
 singlePisoReport Nothing = "Not found"
 singlePisoReport (Just piso) = fmt
-  $  "\n"+|url piso|+"\n\n"
+  $  "\n"+|pisoUrl piso|+"\n\n"
   <> indentF 4 datos
-  <> "\n"+|description piso|+""
+  <> "\n"+|pisoDescription piso|+""
   where
     datos = fmt
-      $  nameF "precio" (""+|price piso|+" ("+|formatDate (firstSeen piso)|+")\n")
-      <> nameF "ultimo precio" (""+|lastPrice piso|+" ("+|formatDate (recentSeen piso)|+")\n")
+      $  nameF "precio" (""+|pisoPrice piso|+" ("+|formatDate (pisoFirstSeen piso)|+")\n")
+      <> nameF "ultimo precio" (""+|pisoLastPrice piso|+" ("+|formatDate (pisoRecentSeen piso)|+")\n")
       <> nameF "piso" (""+|pisoAscensor piso|+"\n")
-      <> nameF "superficie" (""+|size piso|+" m2\n")
-      <> nameF "exterior" (""+|exterior piso|+"\n")
-      <> nameF "habitaciones" (""+|rooms piso|+"\n")
-      <> nameF "estado" (""+|status piso|+"\n")
+      <> nameF "superficie" (""+|pisoSize piso|+" m2\n")
+      <> nameF "exterior" (""+|pisoExterior piso|+"\n")
+      <> nameF "habitaciones" (""+|pisoRooms piso|+"\n")
+      <> nameF "estado" (""+|pisoStatus piso|+"\n")

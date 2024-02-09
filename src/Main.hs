@@ -1,12 +1,11 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module Main where
-
+module Main (main) where
+  
 import Params
 import JsonWorker ( loadNewData )
 import PisoReport ( reportFromId, textReport )
-import PisoData ( PisoData(propertyCode) )
-import Archiver ( loadArchive, updateArchive )
+import Archiver ( updateArchive, loadArchiveDB )
 import ApiRequest ()
 
 import Data.Text ( Text )
@@ -28,16 +27,14 @@ workUpdate = do
 
 workHistorical :: ReaderT AppConfig IO ()
 workHistorical = do
-  pisos <- loadArchive
+  pisos <- loadArchiveDB
   liftIO $ putStrLn (textReport pisos)
 
 workAvailable :: ReaderT AppConfig IO ()
 workAvailable = do
   Just newPisos <- loadNewData
   pisos <- updateArchive newPisos
-  liftIO $ do
-    let availablePisos = filter (\p -> propertyCode p `elem` map propertyCode newPisos) pisos
-    putStrLn $ textReport availablePisos
+  liftIO $ putStrLn $ textReport pisos
 
 workSinglePiso :: Text -> ReaderT AppConfig IO ()
 workSinglePiso code = do
@@ -54,13 +51,13 @@ work Params{subcommand=DisplaySingle str} = workSinglePiso str
 loadConfig :: FilePath -> IO AppConfig
 loadConfig filePath = do
   conf <- load [Required filePath]
-  AppConfig 
+  AppConfig
     <$> lookupDefault "" conf "apiKey"
     <*> lookupDefault "" conf "authURL"
-    <*> lookupDefault "" conf "searchURL" 
+    <*> lookupDefault "" conf "searchURL"
     <*> lookupDefault [] conf "searchParams"
-    <*> lookupDefault "" conf "archiveFilePath" 
-    
+    <*> lookupDefault "" conf "databaseFilePath"
+
 main :: IO ()
 main = do
   params <- cmdLineParser

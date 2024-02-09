@@ -10,7 +10,7 @@ data AppConfig = AppConfig {
   , authURL :: Text
   , searchURL :: Text
   , searchParams :: [(ByteString, ByteString)]
-  , archivePath :: FilePath
+  , databasePath :: FilePath
 } deriving ( Show )
 
 data Subcommand = 

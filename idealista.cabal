@@ -15,10 +15,13 @@ library
   exposed-modules:
       ApiRequest
       Archiver
+      DatabaseBuild
       JsonWorker
+      Marshalling
       Params
       PisoData
       PisoReport
+      Schemas
   other-modules:
       Paths_idealista
   hs-source-dirs:
@@ -29,14 +32,19 @@ library
     , base >=4.7 && <5
     , bytestring
     , colonnade
+    , conduit
     , configurator
     , directory
     , fmt
     , http-conduit
+    , monad-logger
     , mtl
     , optparse-applicative
+    , persistent
+    , persistent-sqlite
     , text
     , time
+    , unliftio-core
     , vector
   default-language: Haskell2010
 
@@ -52,15 +60,20 @@ executable idealista-exe
     , base >=4.7 && <5
     , bytestring
     , colonnade
+    , conduit
     , configurator
     , directory
     , fmt
     , http-conduit
     , idealista
+    , monad-logger
     , mtl
     , optparse-applicative
+    , persistent
+    , persistent-sqlite
     , text
     , time
+    , unliftio-core
     , vector
   default-language: Haskell2010
 
@@ -77,17 +90,22 @@ test-suite idealista-test
     , base >=4.7 && <5
     , bytestring
     , colonnade
+    , conduit
     , configurator
     , directory
     , fmt
     , hspec
     , http-conduit
     , idealista
+    , monad-logger
     , mtl
     , optparse-applicative
+    , persistent
+    , persistent-sqlite
     , tasty
     , tasty-hspec
     , text
     , time
+    , unliftio-core
     , vector
   default-language: Haskell2010

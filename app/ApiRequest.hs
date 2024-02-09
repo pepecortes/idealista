@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 
-module ApiRequest where
+module ApiRequest (requestAuth, requestSearch) where
 
 import Params ( AppConfig(searchURL, authURL, apiKey) )
 
@@ -20,8 +20,7 @@ import Data.Aeson ( Value(String, Object) )
 import qualified Data.Aeson.KeyMap as K (lookup)
 import Data.ByteString (ByteString)
 import Control.Monad ( when )
-import Control.Monad.Reader
-    ( when, ReaderT, MonadIO(liftIO), asks )
+import Control.Monad.Reader ( ReaderT, MonadIO(liftIO), asks )
 
 authHeaders :: Text -> RequestHeaders
 authHeaders apiKey = [
@@ -52,7 +51,6 @@ requestAuth = do
             $ setRequestHeaders (authHeaders apiKey)
             $ setRequestBodyURLEncoded authParams request'
     response <- httpJSON request
-    let status = getResponseStatusCode response
     let (Object json) = getResponseBody response :: Value
     let Just (String token) = K.lookup "access_token" json
     return token
