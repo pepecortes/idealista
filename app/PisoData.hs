@@ -11,7 +11,7 @@ data PisoData = PisoData {
     propertyCode ::  Text
   , url :: Text
   , exterior :: Bool
-  , floor ::  Text
+  , floor ::  Maybe Text
   , price :: Integer
   , rooms :: Integer
   , size :: Integer

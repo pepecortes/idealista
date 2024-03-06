@@ -2,7 +2,7 @@ module Archiver (updateArchive, loadArchiveDB) where
 
 import Params ( AppConfig )
 import PisoData ( PisoData )
-import DatabaseBuild (getPisos, updatePisoData )
+import Database (getPisos, updatePisoData )
 import Schemas (Piso)
 
 import Control.Monad.Reader ( ReaderT, ReaderT )

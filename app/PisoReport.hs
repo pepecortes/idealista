@@ -44,14 +44,16 @@ extInt True = "exterior"
 extInt False = "interior"
 
 pisoAscensor :: Piso -> String
-pisoAscensor pd | pisoHasLift pd = noQuotes $ show piso
-                | otherwise  = noQuotes $ show $ T.append piso " (sin ascensor)"
+pisoAscensor pd | pisoHasLift pd = noQuotes $ show whichFloor
+                | otherwise  = noQuotes $ show $ T.append whichFloor " (sin ascensor)"
   where
-    piso = pisoFloor pd
+    whichFloor = get $ pisoFloor pd
+    get Nothing = "--"
+    get (Just flr) = flr
 
 reportFromId :: [Piso] -> Text -> Text
-reportFromId pd id = singlePisoReport piso
-  where piso = find (\piso -> pisoPropertyCode piso == id) pd
+reportFromId pd ident = singlePisoReport piso
+  where piso = find (\p -> pisoPropertyCode p == ident) pd
 
 singlePisoReport :: Maybe Piso -> Text
 singlePisoReport Nothing = "Not found"

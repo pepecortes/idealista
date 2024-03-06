@@ -2,17 +2,19 @@
 
 module JsonWorker (loadNewData) where
 
-import Params ( AppConfig(searchParams) )
+import Params ( AppConfig )
 import PisoData ( PisoData )
-import ApiRequest ( requestAuth, requestSearch )
+import ApiRequest ( requestSearch )
 
 import Data.Aeson ( FromJSON(parseJSONList) )
 import Data.Aeson.Types ( parseMaybe )
-import Control.Monad.Reader ( ReaderT, asks )
+import Control.Monad.Reader ( ReaderT )
 
 loadNewData :: ReaderT AppConfig IO (Maybe [PisoData])
 loadNewData = do
-    token <- requestAuth
-    queryParams <- asks searchParams
-    value <- requestSearch token queryParams
-    pure $ parseMaybe parseJSONList value
+  response <- requestSearch
+  let pisos = either
+                (error "API error: unable to load new data")
+                (parseMaybe parseJSONList)
+                response
+  pure pisos

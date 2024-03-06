@@ -8,7 +8,7 @@
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module DatabaseBuild (getPisos, updatePisoData) where
+module Database (getPisos, updatePisoData) where
 
 import Schemas
     ( Piso,
@@ -74,5 +74,3 @@ refreshPisoData (Entity key _) PisoData{price}= do
                 , PisoRecentSeen =. Just now
                 ]
   runSqlite (pack path) $ updateGet key updates
-
-

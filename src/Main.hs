@@ -1,20 +1,20 @@
-{-# LANGUAGE OverloadedStrings #-}
-
 module Main (main) where
   
 import Params
+    ( cmdLineParser,
+      loadConfig,
+      AppConfig,
+      Params(..),
+      Subcommand(Test, Update, DisplayAvailable, DisplayHistory,
+                 DisplaySingle) )
 import JsonWorker ( loadNewData )
 import PisoReport ( reportFromId, textReport )
 import Archiver ( updateArchive, loadArchiveDB )
-import ApiRequest ()
 
 import Data.Text ( Text )
 import qualified Data.Text.IO as TIO ( putStrLn )
 import Control.Monad.Reader
     ( ReaderT(runReaderT), MonadIO(liftIO) )
-import Data.Configurator as C
-    ( load, lookupDefault, Worth(Required) )
-
 
 workUpdate :: ReaderT AppConfig IO ()
 workUpdate = do
@@ -42,21 +42,17 @@ workSinglePiso code = do
   pisos <- updateArchive newPisos
   liftIO $ TIO.putStrLn $ reportFromId pisos code
 
+workTest :: ReaderT AppConfig IO ()
+workTest = do
+  Just newPisos <- loadNewData
+  liftIO $ print newPisos
+
 work :: Params -> ReaderT AppConfig IO ()
 work Params{subcommand=Update} = workUpdate
 work Params{subcommand=DisplayAvailable} = workAvailable
 work Params{subcommand=DisplayHistory} = workHistorical
 work Params{subcommand=DisplaySingle str} = workSinglePiso str
-
-loadConfig :: FilePath -> IO AppConfig
-loadConfig filePath = do
-  conf <- load [Required filePath]
-  AppConfig
-    <$> lookupDefault "" conf "apiKey"
-    <*> lookupDefault "" conf "authURL"
-    <*> lookupDefault "" conf "searchURL"
-    <*> lookupDefault [] conf "searchParams"
-    <*> lookupDefault "" conf "databaseFilePath"
+work Params{subcommand=Test} = workTest
 
 main :: IO ()
 main = do

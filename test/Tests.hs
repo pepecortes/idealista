@@ -1,33 +1,79 @@
-{-
-Some examples of Hspec and Property testing (this last one are much too simple, I am afraid)
+{-# LANGUAGE OverloadedStrings #-}
 
-Look at this stack overflow link on how to integrate the tests in the GHCI workflow
-https://stackoverflow.com/questions/39938101/how-to-load-tests-in-ghci-with-stack
+module Spec where
 
-In short, start GHCI in this way:
+import Params
+    ( loadConfig,
+      AppConfig(apiKey),
+      Params(Params, configFile, subcommand),
+      Subcommand(Test) )
+import ApiRequest ( authorizedRequest, requestSearch )
 
-stack ghci --ghci-options -isrc --ghci-options -itest exploring-testing:exploring-testing-test
--}
-
-import Archiver
-
-import Test.Hspec
-import Test.Tasty
-import Test.Tasty.Hspec
-
+import Control.Monad.Reader ( ReaderT(runReaderT) )
+import Test.Hspec ( SpecWith, describe, it, shouldReturn )
+import Test.Tasty ( defaultMain, testGroup )
+import Test.Tasty.Hspec ( testSpecs )
+import System.Directory (getHomeDirectory)
+import Network.HTTP.Client.Conduit (Request(requestHeaders))
+import Data.Either (isRight, isLeft)
+import Control.Monad (when)
+import Database (getPisos)
+import JsonWorker ( loadNewData )
+import Data.Maybe (isJust)
 
 main :: IO ()
 main = do
   specs <- concat <$> mapM testSpecs [specTests]
   defaultMain (testGroup "All tests" [
                   testGroup "Specs" specs
-                -- , testGroup "Properties" props
               ])
 
 specTests :: SpecWith ()
-specTests = 
-  describe "Hspec tests" $ do
-    it "always succeeds" $
-      isTrue `shouldBe` True
+specTests = describe "idealista Hspec tests" $ do
+  it "can access the database" $
+    canGetArchives `shouldReturn` True
+  it "~/.idealista/config should have apiKey" $
+    haveApiKey `shouldReturn` True
+  it "can get authorization from api" $
+    canGetAuthorization `shouldReturn` True
+  it "can get results from a search" $
+    canGetATestSearch `shouldReturn` True
+  it "cat get well formatted JSON data from a search" $
+    canGetPisoData `shouldReturn` True
 
-isTrue = True
+getConfig :: IO AppConfig
+getConfig = do
+  home <- getHomeDirectory
+  let params = Params {configFile = home ++ "/.idealista/config", subcommand = Test}
+  loadConfig $ configFile params
+
+haveApiKey :: IO Bool
+haveApiKey = do
+  cfg <- getConfig
+  pure $ apiKey cfg /= ""
+
+canGetAuthorization :: IO Bool
+canGetAuthorization = do
+  cfg <- getConfig
+  request <- runReaderT authorizedRequest cfg
+  pure $ requestHeaders request /= []
+
+canGetATestSearch :: IO Bool
+canGetATestSearch = do
+  cfg <- getConfig
+  result <- runReaderT requestSearch cfg
+  when (isLeft result) $ print result
+  pure $ isRight result
+
+canGetArchives :: IO Bool
+canGetArchives = do
+  cfg <- getConfig
+  pisos <- runReaderT getPisos cfg
+  putStr $ "pisos in database: " ++ show (length pisos) ++ " "
+  pure $ not (null pisos)
+
+canGetPisoData :: IO Bool
+canGetPisoData = do
+  cfg <- getConfig
+  maybe_result <- runReaderT loadNewData cfg
+  pure $ isJust maybe_result
